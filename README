@@ -1,0 +1,63 @@
+1.SQLServer2008R2
+	A.创建数据库;
+	B.设置sa用户登录;
+	C.创建student表(id, name, age);
+
+
+2.VS2015
+	A.服务器资源管理器中打开数据库;
+	B.数据库属性中拷贝连接字符串;
+	C.新建ASP.NMT Web应用程序, 右键项目, 添加web服务项, 添加数据库操作类, 生成, 发布到本地目录;
+
+
+3.IIS7.0
+	A.在网站选项中添加网站, 设定本地盘符路径;
+	B.拷贝VS2015发布的项目目录下文件到上一部路径;
+	C.右侧目录浏览选项启用;
+	D.浏览网站, 查看接口;
+
+
+4.QT
+	A.新建项目;
+	B.下载gsoap源码, 将gsoap\bin添加到环境变量;
+	C.在项目工程目录新建gsoap文件夹, 将gsoap源码中的stdsoap2.cpp,stdsoap2.h, soap12.h, soapC.cpp, soapClient.cpp 拷贝到gsoap目录下;
+	D.命令行进入工程目录gsoap文件下,
+		输入命令 wsdl2h -I"{your gsoap source dir}/WS" -s -o test.h {your webserver URL}?WSDL , 生成test.h文件
+		输入命令 soapcpp2 -I"{your gsoap source dir}/import" -C -x -i test.h
+		wsdl2h常用指令:
+			-o filename.h     将wsdl转化为filename.h头文件
+			-s　　　　　　　　不生成STL代码
+			-c　　　　　　　  生成纯C风格的头文件，这将去除C++的一些特性
+			-n name　　　　　 使用name代替默认前缀ns
+			-t filename.dat　 使用filename.dat代替默认的typemap.dat文件
+			-zX　　　　　　　 兼容之前的X版本
+		soapcpp2常用指令:
+			-i                生成server的proxy和object，这种object继承于soap struct。
+			-j                和-i类似，区别在于生成的代理类不继承于soap struct，而是包含了包含了一个soap结构的指针。此种方式生存的代理类便于互相通信
+			-C                仅生成客户端client代码
+			-S                仅生成服务端server代码
+			-x                不生成xml文件。不用此项的话，将对头文件中定义的每个operation生成一个描述性的xml文件
+			-L                不生成soapClientLib文件和soapServerLib文件
+	E.在工程.pro文件加入以下内容
+		INCLUDEPATH += $$PWD/gsoap
+		SOURCES += gsoap/soapC.cpp \
+			gsoap/soapClient.cpp \
+			gsoap/stdsoap2.cpp \
+			gsoap/soapWebService1SoapProxy.cpp(webservice工程生成的文件)
+	F.测试:
+		main.cpp 添加头文件:
+			#include "WebService1Soap.nsmap" (webservice工程生成的文件)
+			#include "soapWebService1SoapProxy.h" (webservice工程生成的文件)
+		main函数添加测试代码:
+			WebService1SoapProxy mySoap; // soapWebService1SoapProxy.h声明
+			_tempuri__insertData reqID;
+			_tempuri__insertDataResponse resIDR;
+			std::string _id = "1";
+			std::string _name = "Tang";
+			std::string _age = "25";
+			reqID.id = &_id;
+			reqID.name = &_name;
+			reqID.age = &_age;
+			mySoap.insertData_(&reqID, resIDR);
+		编译运行, 查看数据库student表多了一条记录
+
